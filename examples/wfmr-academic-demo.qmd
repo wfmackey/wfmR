@@ -1,0 +1,372 @@
+---
+title: "wfmR Academic Demo"
+subtitle: "Formal figure captions and notes"
+author: "Will Mackey"
+brand: "_extensions/wfmr-academic/_brand.yml"
+bibliography: references.bib
+abstract: |
+  This demo shows the academic article defaults in `wfmR`: a title page with an
+  abstract, an author affiliation and footnote, formal chart and table captions,
+  smaller subtitle/notes/source blocks, and floats that stay close to their
+  references. The examples use ggplot2 [@wickham2016ggplot2], standard
+  principles for statistical graphics [@cleveland1993visualizing;
+  @tufte2001visual], and built-in R datasets so that the document can be
+  rendered without external data files.
+format:
+  wfmr-academic-html:
+    toc: true
+    toc-depth: 2
+    fig-format: svg
+    mainfont: "Newsreader, Georgia, Cambria, Iowan Old Style, Palatino Linotype, Palatino, serif"
+    linestretch: 1.58
+    embed-resources: true
+    code-fold: false
+    code-tools: false
+  wfmr-academic-pdf:
+    toc: false
+    fig-pos: tb
+    include-in-header:
+      text: |
+        \wfmAcademicAuthor{Will Mackey}{Australian National University}{This is a demonstration author note for the academic PDF title page.}
+execute:
+  warning: false
+  message: false
+  echo: false
+crossref:
+  fig-title: Chart
+  fig-prefix: Chart
+---
+
+```{r}
+#| label: setup
+#| include: false
+library(wfmR)
+library(ggplot2)
+wfm_chart_defaults(style = "academic")
+
+mtcars_cyl <- transform(mtcars, cyl = factor(cyl), gear = factor(gear))
+
+wide_vehicle_table <- data.frame(
+  Model = row.names(mtcars),
+  Cylinders = mtcars$cyl,
+  Gears = mtcars$gear,
+  Transmission = ifelse(mtcars$am == 1, "Manual", "Automatic"),
+  `Miles per gallon` = sprintf("%.1f", mtcars$mpg),
+  `Weight (1000 lbs)` = sprintf("%.2f", mtcars$wt),
+  `Gross horsepower` = mtcars$hp,
+  `Quarter-mile time` = sprintf("%.2f", mtcars$qsec),
+  `Rear axle ratio` = sprintf("%.2f", mtcars$drat),
+  Displacement = sprintf("%.0f", mtcars$disp),
+  check.names = FALSE
+)
+wide_vehicle_table <- wide_vehicle_table[
+  order(wide_vehicle_table$Cylinders, wide_vehicle_table$Gears, wide_vehicle_table$Model),
+]
+row.names(wide_vehicle_table) <- NULL
+
+category_df <- data.frame(
+  group = factor(
+    tools::toTitleCase(names(wfm_palette())),
+    levels = tools::toTitleCase(names(wfm_palette()))
+  ),
+  value = c(31, 27, 24, 21, 18, 16, 13)
+)
+
+air_df <- data.frame(
+  year = floor(as.numeric(time(AirPassengers))),
+  month = factor(month.abb[cycle(AirPassengers)], levels = month.abb),
+  passengers = as.numeric(AirPassengers)
+)
+
+wfm_demo_table <- function(
+  x,
+  caption,
+  label,
+  align = NULL,
+  col.names = NULL,
+  subtitle = NULL,
+  notes = NULL,
+  source = NULL,
+  latex_resize = FALSE
+) {
+  sentence <- function(value) {
+    if (is.null(value) || value == "") {
+      return(character())
+    }
+    if (grepl("[.!?]$", value)) value else paste0(value, ".")
+  }
+  details <- paste(
+    c(sentence(subtitle), sentence(notes), sentence(source)),
+    collapse = " "
+  )
+  note_html <- if (nzchar(details)) {
+    paste0("\n<div class=\"chart-notes figure-notes\"><p>", details, "</p></div>\n")
+  } else {
+    ""
+  }
+  note_latex <- if (nzchar(details)) {
+    paste0(
+      "\n\\par\\nopagebreak[4]\\vspace{0.35em}",
+      "\\begingroup\\raggedright\\footnotesize\\linespread{0.92}\\selectfont{}",
+      details,
+      "\\par\\endgroup\n"
+    )
+  } else {
+    ""
+  }
+
+  if (knitr::is_latex_output()) {
+    body <- knitr::kable(
+      x,
+      format = "latex",
+      booktabs = TRUE,
+      align = align,
+      col.names = col.names,
+      row.names = FALSE
+    )
+    if (isTRUE(latex_resize)) {
+      body <- paste0("\\resizebox{\\textwidth}{!}{%\n", body, "\n}")
+    }
+    cat(body, note_latex, sep = "\n")
+    return(invisible(NULL))
+  }
+
+  body <- knitr::kable(x, align = align, col.names = col.names, row.names = FALSE)
+  knitr::asis_output(paste0(body, note_html))
+}
+```
+
+# Descriptive Evidence
+
+@fig-academic-boxplot provides a basic descriptive view of fuel economy by
+cylinder count. This section is intentionally long enough to test whether floats
+move to the top or bottom of nearby pages without separating images, captions,
+notes, and sources. In an applied paper, this is the common case: a paragraph
+introduces the object, the object appears near the reference, and the reader can
+understand the chart without searching elsewhere for metadata.
+
+The academic style differs from the report style in two important ways. First,
+figure captions sit below the image, while table captions sit above the table.
+Second, the subtitle, notes, and source are kept in a smaller details block that
+travels with the float. The layout is deliberately plain: the caption label is
+centred, the caption text is not bold, and the surrounding prose remains in the
+normal article text block.
+
+The prose also uses ordinary cross-references throughout. This matters for PDF
+testing because the reference to @fig-academic-boxplot appears before the
+figure itself. If LaTeX has to move the chart, the float should still land close
+to the first reference while preserving the title, image, subtitle, notes, and
+source as one grouped object. The same rule is checked later by one wide table
+that is large enough to make the placement decision visible.
+
+The next paragraph is dummy placement text. It is intentionally plain and
+repetitive so the figure is not trivially placed where it appears in the source.
+The reference has already appeared, and the chart should now be eligible for the
+top or bottom of the nearest page depending on available space. A manuscript
+paragraph in this position would usually describe data construction, sample
+restrictions, or the intuition behind the descriptive comparison.
+
+A second dummy paragraph lengthens the gap before the first figure. The aim is
+to make the contact sheet reveal whether LaTeX is managing a float queue or
+whether the object is being pinned inline. The grouped caption, image, subtitle,
+notes, and source should move together.
+
+```{r}
+#| label: fig-academic-boxplot
+#| chart-title: "Fuel economy differs by cylinder count"
+#| chart-subtitle: "A simple example using the built-in mtcars data"
+#| chart-notes: "Boxes show the interquartile range and median. Whiskers use ggplot2 defaults."
+#| chart-source: "R datasets package."
+#| fig-width: 6.6
+#| fig-height: 4.2
+mtcars_cyl |>
+  ggplot(aes(cyl, mpg, fill = cyl)) +
+  geom_boxplot(width = 0.62, alpha = 0.9) +
+  scale_fill_wfm() +
+  scale_y_wfm() +
+  labs(x = "Cylinders", y = NULL, subtitle = "Miles per gallon") +
+  theme(legend.position = "none")
+```
+
+# Bivariate Pattern
+
+@fig-academic-scatter uses a scatter plot with a fitted line. It checks
+that a chart with a legend, a subtitle-style y-axis label, and a formal caption
+still feels coherent when it appears inside the academic PDF format. The example
+follows the same broad grammar-of-graphics logic as @wilkinson2005grammar:
+variables are mapped to position and colour, the fitted line is a separate
+layer, and the scale choices remain part of the theme rather than the
+substantive claim.
+
+Dummy placement prose continues here. The next chart is referenced early in the
+section, but the source object appears only after this paragraph. If top/bottom
+floating is working, the chart should not carve out a mid-page slot simply
+because the code chunk is written here.
+
+The additional text keeps the scatter plot from landing trivially in source
+order. A real empirical paper would use this space to explain identification,
+measurement, or modelling choices; the demo uses it to make page composition
+visible.
+
+```{r}
+#| label: fig-academic-scatter
+#| chart-title: "Fuel economy declines with vehicle weight"
+#| chart-subtitle: "Points are grouped by cylinder count"
+#| chart-notes: "The fitted line is an ordinary least squares fit shown for visual orientation."
+#| chart-source: "R datasets package."
+#| fig-width: 6.6
+#| fig-height: 4.2
+mtcars_cyl |>
+  ggplot(aes(wt, mpg, colour = cyl)) +
+  geom_point(size = 2.4, alpha = 0.88) +
+  geom_smooth(
+    method = "lm",
+    formula = y ~ x,
+    se = FALSE,
+    colour = "#2F2F33",
+    linewidth = 0.6
+  ) +
+  scale_colour_wfm(name = "Cylinders") +
+  scale_y_wfm() +
+  labs(
+    x = "Weight (1,000 lbs)",
+    y = NULL,
+    subtitle = "Miles per gallon"
+  )
+```
+
+# Distributional Checks
+
+@fig-academic-density and @tbl-academic-wide-vehicles add two more object types
+before the palette stress test. The density chart checks overlapping
+semi-transparent fills and a legend, while the table is deliberately wide enough
+to exercise caption placement, PDF scaling, and table float behaviour in one
+object.
+
+This is a useful applied-paper stress test because distributional plots often
+sit in the narrative before model results, and wide descriptive tables often
+appear as supporting evidence. The visual design should therefore stay
+disciplined even when several labelled objects occur within a short span of
+prose [@cleveland1993visualizing].
+
+Dummy placement text makes this section behave more like a manuscript page than
+a gallery. The chart has already been referenced, but the source chunk is still
+below this paragraph. LaTeX should be free to decide whether the density chart
+belongs at the bottom of the current page or at the top of the next.
+
+The wide table is deliberately introduced in the same narrative block. That
+creates pressure on the float queue and makes it easier to see whether tables
+are genuine floats. If the table appears mid-page because it is a `longtable`,
+the test has failed.
+
+```{r}
+#| label: fig-academic-density
+#| chart-title: "Fuel-economy distributions differ by cylinder count"
+#| chart-subtitle: "Density curves provide a crowded legend example"
+#| chart-notes: "The curves are illustrative and use the small built-in mtcars data."
+#| chart-source: "R datasets package."
+#| fig-width: 6.6
+#| fig-height: 4.0
+mtcars_cyl |>
+  ggplot(aes(mpg, fill = cyl, colour = cyl)) +
+  geom_density(alpha = 0.32, linewidth = 0.7) +
+  scale_fill_wfm(name = "Cylinders") +
+  scale_colour_wfm(name = "Cylinders") +
+  scale_y_wfm() +
+  labs(x = "Miles per gallon", y = NULL, subtitle = "Density")
+```
+
+@tbl-academic-wide-vehicles should inherit the formal table caption treatment,
+with the caption above the table and the small details below. This is also a
+quick check that shaded HTML rows remain subtle while the PDF table keeps the
+plain academic appearance.
+
+```{r}
+#| label: tbl-academic-wide-vehicles
+#| tbl-cap: "Wide vehicle summary."
+#| results: asis
+wfm_demo_table(
+  wide_vehicle_table,
+  caption = "Wide vehicle summary.",
+  label = "tbl-academic-wide-vehicles",
+  align = c("l", "r", "r", "l", "r", "r", "r", "r", "r", "r"),
+  subtitle = "Selected car-level measures from the built-in mtcars data",
+  notes = "The table is intentionally wide and uses all 32 cars so that PDF placement and scaling remain visible.",
+  source = "R datasets package.",
+  latex_resize = TRUE
+)
+```
+
+# Time-Series Example
+
+@fig-academic-air uses the built-in `AirPassengers` series to test a different
+data shape. The figure is a line chart rather than a categorical comparison,
+which gives the PDF output another opportunity to place a figure at the top or
+bottom of a nearby page while preserving the figure's caption group.
+
+The time-series example also checks that a single salmon-blue accent chart does
+not look out of place next to the more categorical palette examples. That is the
+kind of comparison a template needs to survive in ordinary manuscript drafting,
+where figures rarely all share the same geometry.
+
+This dummy paragraph gives the time-series chart a realistic delay after its
+reference. A chart inserted in source order should still float to a page edge
+when the text block is already partly filled. The point is not the data; the
+point is the page behaviour.
+
+The extra prose is intentionally separated from the chart chunk. This keeps
+the remaining pages realistic without adding more table examples.
+
+```{r}
+#| label: fig-academic-air
+#| chart-title: "Passenger counts rise sharply in the late 1950s"
+#| chart-subtitle: "Monthly totals from the built-in AirPassengers series"
+#| chart-notes: "The example is included to exercise a time-series chart in the same academic style."
+#| chart-source: "R datasets package."
+#| fig-width: 6.6
+#| fig-height: 4.0
+air_df |>
+  ggplot(aes(year + (as.numeric(month) - 1) / 12, passengers)) +
+  geom_line(colour = wfm_palette()[["blue"]], linewidth = 0.82) +
+  geom_point(colour = wfm_palette()[["salmon"]], size = 1.25, alpha = 0.82) +
+  scale_y_wfm() +
+  labs(x = "Year", y = NULL, subtitle = "Passengers")
+```
+
+# Palette Checks
+
+@fig-academic-palette is synthetic. It uses all seven colours in the
+default palette order so that a single page can reveal whether the salmon, teal,
+purple, lime, yellow, blue, and pink sequence remains legible in the formal
+academic setting. The choice is intentionally softer than a strict
+publication-first palette, but the example keeps the sequence explicit for
+brand consistency and for comparison with colour-documentation guidance such as
+@brewer2003colorbrewer.
+
+The final chart is again separated from its reference by dummy text. It should
+therefore make clear whether the remaining material is being handled as a float
+queue. The bibliography barrier at the end of the document is retained only to
+prevent a late float from drifting into the references.
+
+```{r}
+#| label: fig-academic-palette
+#| chart-title: "The academic style keeps the wfmR palette order"
+#| chart-subtitle: "Seven bars exercise every default categorical colour"
+#| chart-notes: "The values are illustrative and are ordered only to show the default colour sequence."
+#| chart-source: "Illustrative data."
+#| fig-width: 6.6
+#| fig-height: 4.0
+category_df |>
+  ggplot(aes(group, value, fill = group)) +
+  geom_col(width = 0.72) +
+  scale_fill_wfm() +
+  scale_y_wfm(limits = c(0, NA)) +
+  labs(x = NULL, y = NULL, subtitle = "Value") +
+  theme(legend.position = "none")
+```
+
+```{=latex}
+\FloatBarrier
+```
+
+# References

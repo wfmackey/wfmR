@@ -1,0 +1,46 @@
+<script>
+(function() {
+  const replacements = [
+    [/rgb\(92\.156863%, 92\.156863%, 92\.156863%\)/g,
+     "rgb(45.882353%, 45.882353%, 45.882353%)"],
+    [/stroke="rgb\(0%, 0%, 0%\)"/g,
+     'stroke="rgb(30%, 30%, 30%)"']
+  ];
+  const trigger = replacements[0][0];
+  const prep = () => {
+    document.querySelectorAll('img[src^="data:image/svg+xml"]').forEach(img => {
+      if (img.dataset.srcDark) return;
+      try {
+        const prefix = "data:image/svg+xml;base64,";
+        if (!img.src.startsWith(prefix)) return;
+        const b64 = img.src.slice(prefix.length);
+        const svg = atob(b64);
+        if (!trigger.test(svg)) return;
+        const darkSvg = replacements.reduce((s, pair) => s.replace(pair[0], pair[1]), svg);
+        img.dataset.srcLight = img.src;
+        img.dataset.srcDark = prefix + btoa(darkSvg);
+      } catch (e) {
+      }
+    });
+  };
+  const apply = () => {
+    const dark = document.body.classList.contains("quarto-dark");
+    document.querySelectorAll("img[data-src-dark]").forEach(img => {
+      img.src = dark ? img.dataset.srcDark : img.dataset.srcLight;
+    });
+  };
+  const ready = () => {
+    prep();
+    apply();
+    new MutationObserver(apply).observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class"]
+    });
+  };
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", ready);
+  } else {
+    ready();
+  }
+})();
+</script>

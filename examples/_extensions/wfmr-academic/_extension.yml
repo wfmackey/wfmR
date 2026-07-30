@@ -1,0 +1,63 @@
+title: wfmR Academic
+author: Will Mackey
+version: "0.0.1"
+quarto-required: ">=1.4.0"
+contributes:
+  formats:
+    html:
+      filters:
+        - chart-notes.lua
+      include-after-body:
+        - chart-dark-mode.html
+      crossref:
+        fig-title: Chart
+        fig-prefix: Chart
+      theme:
+        light:
+          - cosmo
+          - brand
+          - html.scss
+        dark:
+          - darkly
+          - brand
+          - html.scss
+      fig-format: svg
+      embed-resources: true
+      code-annotations: below
+      code-fold: show
+      code-tools: true
+      toc: true
+      toc-location: left
+      toc-depth: 3
+      toc-expand: true
+      fig-cap-location: bottom
+      df-print: paged
+    pdf:
+      filters:
+        - at: post-render
+          path: chart-notes.lua
+      crossref:
+        fig-title: Chart
+        fig-prefix: Chart
+      documentclass: article
+      papersize: a4
+      geometry:
+        - top=1in
+        - left=1.3in
+        - right=1.3in
+        - bottom=1.2in
+        - footskip=0.7in
+      fontsize: 11pt
+      linestretch: 1.2
+      toc: false
+      colorlinks: true
+      linkcolor: black
+      citecolor: black
+      urlcolor: black
+      link-citations: true
+      link-bibliography: true
+      fig-cap-location: bottom
+      tbl-cap-location: top
+      fig-pos: tb
+      include-in-header:
+        - latex-header.tex

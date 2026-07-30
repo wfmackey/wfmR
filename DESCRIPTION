@@ -1,0 +1,34 @@
+Package: wfmR
+Title: Will Mackey's R Graphics and Quarto Defaults
+Version: 0.0.0.9000
+Authors@R: 
+    person("Will", "Mackey", email = "will.mackey@anu.edu.au",
+           role = c("aut", "cre"))
+Author: Will Mackey [aut, cre]
+Maintainer: Will Mackey <will.mackey@anu.edu.au>
+Description: Provides chart palettes, colour-vision diagnostics, a ggplot2
+    theme, export helpers, and Quarto HTML, PDF, and revealjs defaults for Will
+    Mackey's research notes, policy briefs, papers, and presentations.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends:
+    R (>= 4.1)
+Imports:
+    colorspace,
+    farver,
+    ggplot2,
+    grDevices,
+    rlang,
+    scales,
+    tools,
+    utils
+Suggests:
+    knitr,
+    ragg,
+    rmarkdown,
+    testthat (>= 3.0.0),
+    tidyverse,
+    withr
+Config/testthat/edition: 3
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2

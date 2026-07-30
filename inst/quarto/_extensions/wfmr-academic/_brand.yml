@@ -1,0 +1,87 @@
+meta:
+  name: wfmR Academic Rose Pine
+  link: https://github.com/nicoleajoy/rose-pine-spotify
+
+color:
+  palette:
+    dawn-base: "#FAF4ED"
+    dawn-surface: "#FFFAF3"
+    dawn-overlay: "#F2E9E1"
+    dawn-muted: "#9893A5"
+    dawn-subtle: "#797593"
+    dawn-text: "#575279"
+    dawn-love: "#B4637A"
+    dawn-gold: "#EA9D34"
+    dawn-rose: "#D7827E"
+    dawn-pine: "#286983"
+    dawn-foam: "#56949F"
+    dawn-iris: "#907AA9"
+    moon-base: "#232136"
+    moon-surface: "#2A273F"
+    moon-overlay: "#393552"
+    moon-muted: "#6E6A86"
+    moon-subtle: "#908CAA"
+    moon-text: "#E0DEF4"
+    moon-love: "#EB6F92"
+    moon-gold: "#F6C177"
+    moon-rose: "#EBBCBA"
+    moon-pine: "#3E8FB0"
+    moon-foam: "#9CCFD8"
+    moon-iris: "#C4A7E7"
+  foreground:
+    light: "#575279"
+    dark: "#E0DEF4"
+  background:
+    light: "#FAF4ED"
+    dark: "#232136"
+  primary:
+    light: "#B4637A"
+    dark: "#EBBCBA"
+  secondary:
+    light: "#797593"
+    dark: "#908CAA"
+  tertiary:
+    light: "#F2E9E1"
+    dark: "#393552"
+  success:
+    light: "#286983"
+    dark: "#9CCFD8"
+  info:
+    light: "#56949F"
+    dark: "#9CCFD8"
+  warning:
+    light: "#EA9D34"
+    dark: "#F6C177"
+  danger:
+    light: "#B4637A"
+    dark: "#EB6F92"
+  light:
+    light: "#FFFAF3"
+    dark: "#393552"
+  dark:
+    light: "#575279"
+    dark: "#232136"
+
+typography:
+  fonts:
+    - family: Newsreader
+      source: file
+      files:
+        - path: fonts/newsreader/Newsreader-Variable.woff2
+        - path: fonts/newsreader/Newsreader-Italic-Variable.woff2
+          style: italic
+  headings:
+    weight: 700
+    color:
+      light: "#575279"
+      dark: "#E0DEF4"
+  link:
+    color:
+      light: "#B4637A"
+      dark: "#EBBCBA"
+
+defaults:
+  bootstrap:
+    defaults:
+      border-radius: "0.2rem"
+      link-decoration: none

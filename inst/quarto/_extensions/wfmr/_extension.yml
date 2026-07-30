@@ -1,0 +1,97 @@
+title: wfmR
+author: Will Mackey
+version: "0.0.1"
+quarto-required: ">=1.4.0"
+contributes:
+  formats:
+    html:
+      filters:
+        - chart-notes.lua
+      include-after-body:
+        - chart-dark-mode.html
+      crossref:
+        fig-title: Chart
+        fig-prefix: Chart
+      theme:
+        light:
+          - cosmo
+          - brand
+          - html.scss
+        dark:
+          - darkly
+          - brand
+          - html.scss
+      fig-format: svg
+      embed-resources: true
+      code-annotations: below
+      code-fold: show
+      code-tools: true
+      toc: true
+      toc-location: left
+      toc-depth: 3
+      toc-expand: true
+      fig-cap-location: top
+      df-print: paged
+    pdf:
+      filters:
+        - at: post-render
+          path: chart-notes.lua
+      crossref:
+        fig-title: Chart
+        fig-prefix: Chart
+      documentclass: article
+      papersize: a4
+      geometry:
+        - top=1in
+        - left=1.3in
+        - right=1.3in
+        - bottom=1.2in
+        - footskip=0.7in
+      fontsize: 11pt
+      linestretch: 1.2
+      toc: false
+      colorlinks: true
+      linkcolor: black
+      citecolor: black
+      urlcolor: black
+      link-citations: true
+      link-bibliography: true
+      fig-cap-location: top
+      tbl-cap-location: top
+      fig-pos: tb
+      include-in-header:
+        - latex-header.tex
+    revealjs:
+      filters:
+        - chart-notes.lua
+        - section-slides.lua
+      include-after-body:
+        - chart-reveal-layout.html
+      crossref:
+        fig-title: Chart
+        fig-prefix: Chart
+      theme:
+        - default
+        - brand
+        - revealjs.scss
+      fig-format: svg
+      fig-cap-location: top
+      slide-number: c/t
+      show-slide-number: all
+      preview-links: auto
+      transition: fade
+      background-transition: fade
+      controls: true
+      progress: true
+      smaller: false
+      code-line-numbers: false
+      footer: ""
+      width: 1280
+      height: 720
+    pptx:
+      filters:
+        - pptx-compat.lua
+      reference-doc: wfmr-light-quarto-reference.pptx
+      slide-level: 2
+      fig-format: svg
+      monofont: Menlo

@@ -1,0 +1,221 @@
+---
+title: "wfmR Slide Demo"
+subtitle: "Typography, palette, and chart metadata"
+author: "Will Mackey"
+brand: "_extensions/wfmr/_brand.yml"
+format:
+  wfmr-revealjs:
+    embed-resources: true
+    slide-number: c/t
+    transition: fade
+    controls: true
+    progress: true
+execute:
+  warning: false
+  message: false
+  echo: false
+crossref:
+  fig-title: Chart
+  fig-prefix: Chart
+---
+
+```{r}
+#| label: setup
+#| include: false
+library(wfmR)
+library(ggplot2)
+wfm_chart_defaults(base_size = 18)
+
+category_df <- data.frame(
+  group = factor(
+    tools::toTitleCase(names(wfm_palette())),
+    levels = tools::toTitleCase(names(wfm_palette()))
+  ),
+  value = c(31, 27, 24, 21, 18, 16, 13)
+)
+
+volcano_df <- as.data.frame(as.table(volcano))
+names(volcano_df) <- c("x", "y", "height")
+volcano_df <- transform(
+  volcano_df,
+  x = as.integer(x),
+  y = as.integer(y),
+  signal = height - mean(height)
+)
+
+mtcars_cyl <- transform(mtcars, cyl = factor(cyl))
+```
+
+## Text Styles
+
+The revealjs theme translates the HTML palette into a presentation setting:
+system UI type, restrained headings, Rose Pine links, and shared chart metadata.
+
+[Salmon]{.label-salmon}, [teal]{.label-teal}, [purple]{.label-purple}, and
+[lime]{.label-lime} use the same generic coloured labels as the article
+theme.
+
+::: {.small-disclaimer}
+Slides use larger chart text and transparent SVG output so figures remain
+crisp when projected.
+:::
+
+## Code Style
+
+```{r}
+#| echo: true
+#| eval: false
+category_df |>
+  ggplot(aes(group, value, fill = group)) +
+  geom_col(width = 0.72) +
+  scale_fill_wfm() +
+  scale_y_wfm(limits = c(0, NA)) +
+  labs(x = NULL, y = NULL, subtitle = "Value") +
+  theme_wfm()
+```
+
+## Salmon {.section-salmon}
+
+Warm emphasis for motivation, takeaways, and section breaks.
+
+## Teal {.section-teal}
+
+Calm evidence sections with a soft analytical tone.
+
+## Purple {.section-purple}
+
+Conceptual framing, methods, and transitions between arguments.
+
+## Lime {.section-lime}
+
+Supporting structure for design notes and secondary findings.
+
+## Yellow {.section-yellow}
+
+Attention moments for caveats, contrasts, and important pivots.
+
+## Blue {.section-blue}
+
+Grounded analytical sections for results and interpretation.
+
+## Pink {.section-pink}
+
+Closing sections, discussion, and synthesis.
+
+## Primary Palette
+
+```{r}
+#| label: fig-slide-palette
+#| fig-width: 10
+#| fig-height: 3.3
+palette_df <- data.frame(
+  colour = factor(names(wfm_palette()), levels = names(wfm_palette())),
+  value = unname(wfm_palette())
+)
+
+ggplot(palette_df, aes(colour, 1, fill = colour)) +
+  geom_tile(height = 0.72) +
+  geom_text(aes(label = value), y = 1, size = 4.4) +
+  scale_fill_manual(values = wfm_palette()) +
+  labs(x = NULL, y = NULL) +
+  theme_wfm(grid = FALSE) +
+  theme(
+    axis.text.y = element_blank(),
+    axis.text.x = element_text(face = "bold"),
+    legend.position = "none"
+  )
+```
+
+## Categorical Chart
+
+```{r}
+#| label: fig-slide-bars
+#| chart-title: "Seven categories use the primary order"
+#| chart-subtitle: "The bar chart exercises every default colour"
+#| chart-notes: "Use direct labels or another aesthetic when dense categories carry analytical weight."
+#| chart-source: "Illustrative data."
+#| fig-width: 9
+#| fig-height: 4.8
+category_df |>
+  ggplot(aes(group, value, fill = group)) +
+  geom_col(width = 0.72) +
+  scale_fill_wfm() +
+  scale_y_wfm(limits = c(0, NA)) +
+  labs(x = NULL, y = NULL, subtitle = "Value") +
+  theme_wfm() +
+  theme(legend.position = "none")
+```
+
+## Sequential Scale
+
+```{r}
+#| label: fig-slide-seq
+#| chart-title: "Sequential colour follows ordered intensity"
+#| chart-subtitle: "Blue, teal, and pale yellow are interpolated in OKLab"
+#| chart-notes: "This is the default sequential palette."
+#| chart-source: "R datasets package."
+#| fig-width: 8.8
+#| fig-height: 4.8
+ggplot(volcano_df, aes(x, y, fill = height)) +
+  geom_tile() +
+  scale_fill_wfm_seq(palette = "blue_teal_yellow", name = "Height") +
+  coord_equal(expand = FALSE) +
+  labs(x = NULL, y = NULL) +
+  theme_wfm(grid = FALSE) +
+  theme(
+    axis.text = element_blank(),
+    legend.position = "right"
+  )
+```
+
+## Diverging Scale
+
+```{r}
+#| label: fig-slide-div
+#| chart-title: "Diverging colour marks distance from a midpoint"
+#| chart-subtitle: "Teal and salmon sit either side of neutral"
+#| chart-notes: "The midpoint is set to zero."
+#| chart-source: "R datasets package."
+#| fig-width: 8.8
+#| fig-height: 4.8
+ggplot(volcano_df, aes(x, y, fill = signal)) +
+  geom_tile() +
+  scale_fill_wfm_div(palette = "teal_salmon", midpoint = 0, name = "Signal") +
+  coord_equal(expand = FALSE) +
+  labs(x = NULL, y = NULL) +
+  theme_wfm(grid = FALSE) +
+  theme(
+    axis.text = element_blank(),
+    legend.position = "right"
+  )
+```
+
+## Table and Chart
+
+```{r}
+#| label: fig-slide-boxplot
+#| chart-title: "Fuel economy by engine size"
+#| chart-subtitle: "Boxplot using the wfmR fill scale"
+#| chart-notes: "Colours come from the package palette."
+#| chart-source: "R datasets package."
+#| fig-width: 8.5
+#| fig-height: 4.6
+mtcars_cyl |>
+  ggplot(aes(cyl, mpg, fill = cyl)) +
+  geom_boxplot(width = 0.62, alpha = 0.9) +
+  scale_fill_wfm() +
+  labs(x = "Cylinders", y = "Miles per gallon")
+```
+
+## Compact Table
+
+```{r}
+#| label: tbl-slide-summary
+summary_df <- aggregate(
+  mpg ~ cyl,
+  mtcars_cyl,
+  function(x) sprintf("%.1f", mean(x))
+)
+names(summary_df) <- c("Cylinders", "Mean miles per gallon")
+knitr::kable(summary_df, align = c("l", "r"))
+```

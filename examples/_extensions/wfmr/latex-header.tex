@@ -1,0 +1,54 @@
+\IfFileExists{sourceserifpro.sty}{\usepackage{sourceserifpro}}{}
+\AtBeginDocument{\frenchspacing}
+\usepackage[flushmargin,bottom]{footmisc}
+\usepackage{xcolor}
+\usepackage{pagecolor}
+\definecolor{wfmTeal}{HTML}{56949F}
+\definecolor{wfmSalmon}{HTML}{D7827E}
+\definecolor{wfmYellow}{HTML}{EA9D34}
+\definecolor{wfmPink}{HTML}{B4637A}
+\definecolor{wfmLime}{HTML}{8B9A5A}
+\definecolor{wfmBlue}{HTML}{286983}
+\definecolor{wfmGreen}{HTML}{6F8F72}
+\definecolor{wfmPurple}{HTML}{907AA9}
+\definecolor{wfmText}{HTML}{575279}
+\definecolor{wfmPageBg}{HTML}{FEFCFA}
+\AtBeginDocument{\pagecolor{wfmPageBg}\color{black}}
+\usepackage{titling}
+\setlength{\droptitle}{0cm}
+\usepackage{titlesec}
+\titleformat*{\section}{\centering\large\bfseries\color{black}}
+\titleformat*{\subsection}{\bfseries\color{black}}
+\titleformat{\paragraph}[runin]{\itshape\color{black}}{}{}{}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{etoolbox}
+\usepackage{flafter}
+\IfFileExists{placeins.sty}{\usepackage{placeins}}{\newcommand{\FloatBarrier}{}}
+\usepackage{caption}
+\captionsetup[figure]{labelfont=bf}
+\renewcommand{\figurename}{Chart}
+\makeatletter
+\def\fps@figure{tb}
+\def\fps@table{tb}
+\makeatother
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\bottomfraction}{0.75}
+\renewcommand{\textfraction}{0.12}
+\renewcommand{\floatpagefraction}{0.95}
+\newcommand{\wfmFooterMark}{\hspace{0.45em}\raisebox{0.05em}{\textcolor{wfmSalmon}{\rule{0.55em}{0.55em}}}}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[R]{\small \thepage\wfmFooterMark}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancypagestyle{plain}{%
+  \fancyhf{}%
+  \fancyfoot[R]{\small \thepage\wfmFooterMark}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\footrulewidth}{0pt}%
+}
+\AtBeginEnvironment{CSLReferences}{\small}

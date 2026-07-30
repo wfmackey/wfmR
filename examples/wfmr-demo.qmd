@@ -1,0 +1,427 @@
+---
+title: "wfmR Article Demo"
+subtitle: "Typography, colour, one wide table, and chart metadata"
+author: "Will Mackey"
+brand: "_extensions/wfmr/_brand.yml"
+bibliography: references.bib
+format:
+  wfmr-html:
+    toc: true
+    toc-depth: 2
+    fig-format: svg
+    embed-resources: true
+    code-fold: false
+    code-tools: false
+  wfmr-pdf:
+    toc: false
+    fig-pos: tb
+execute:
+  warning: false
+  message: false
+  echo: false
+crossref:
+  fig-title: Chart
+  fig-prefix: Chart
+---
+
+```{r}
+#| label: setup
+#| include: false
+library(wfmR)
+library(ggplot2)
+wfm_chart_defaults()
+
+mtcars_cyl <- transform(mtcars, cyl = factor(cyl), gear = factor(gear))
+
+category_df <- data.frame(
+  group = factor(
+    tools::toTitleCase(names(wfm_palette())),
+    levels = tools::toTitleCase(names(wfm_palette()))
+  ),
+  value = c(31, 27, 24, 21, 18, 16, 13)
+)
+
+volcano_df <- as.data.frame(as.table(volcano))
+names(volcano_df) <- c("x", "y", "height")
+volcano_df <- transform(
+  volcano_df,
+  x = as.integer(x),
+  y = as.integer(y),
+  signal = height - mean(height)
+)
+
+wide_vehicle_table <- data.frame(
+  Model = row.names(mtcars),
+  Cylinders = mtcars$cyl,
+  Gears = mtcars$gear,
+  Transmission = ifelse(mtcars$am == 1, "Manual", "Automatic"),
+  `Miles per gallon` = sprintf("%.1f", mtcars$mpg),
+  `Weight (1000 lbs)` = sprintf("%.2f", mtcars$wt),
+  `Gross horsepower` = mtcars$hp,
+  `Quarter-mile time` = sprintf("%.2f", mtcars$qsec),
+  `Rear axle ratio` = sprintf("%.2f", mtcars$drat),
+  Displacement = sprintf("%.0f", mtcars$disp),
+  check.names = FALSE
+)
+wide_vehicle_table <- wide_vehicle_table[
+  order(wide_vehicle_table$Cylinders, wide_vehicle_table$Gears, wide_vehicle_table$Model),
+]
+row.names(wide_vehicle_table) <- NULL
+
+air_df <- data.frame(
+  year = floor(as.numeric(time(AirPassengers))),
+  month = factor(month.abb[cycle(AirPassengers)], levels = month.abb),
+  passengers = as.numeric(AirPassengers)
+)
+
+wfm_demo_table <- function(
+  x,
+  caption,
+  label,
+  align = NULL,
+  col.names = NULL,
+  notes = NULL,
+  source = NULL,
+  latex_resize = FALSE
+) {
+  note_html <- if (!is.null(notes) || !is.null(source)) {
+    paste0(
+      "\n<div class=\"chart-notes figure-notes\"><p>",
+      if (!is.null(notes)) paste0("<em>Notes:</em> ", notes) else "",
+      if (!is.null(notes) && !is.null(source)) "<br>" else "",
+      if (!is.null(source)) paste0("<em>Source:</em> ", source) else "",
+      "</p></div>\n"
+    )
+  } else {
+    ""
+  }
+
+  note_latex <- if (!is.null(notes) || !is.null(source)) {
+    paste0(
+      "\n\\par\\nopagebreak[4]\\vspace{0.35em}",
+      "\\begingroup\\raggedright\\footnotesize\\linespread{0.88}\\selectfont\\itshape{}",
+      if (!is.null(notes)) paste0("Notes: ", notes) else "",
+      if (!is.null(notes) && !is.null(source)) "\\\\\n" else "",
+      if (!is.null(source)) paste0("Source: ", source) else "",
+      "\\par\\endgroup\n"
+    )
+  } else {
+    ""
+  }
+
+  if (knitr::is_latex_output()) {
+    body <- knitr::kable(
+      x,
+      format = "latex",
+      booktabs = TRUE,
+      align = align,
+      col.names = col.names,
+      row.names = FALSE
+    )
+    if (isTRUE(latex_resize)) {
+      body <- paste0("\\resizebox{\\textwidth}{!}{%\n", body, "\n}")
+    }
+    cat(body, note_latex, sep = "\n")
+    return(invisible(NULL))
+  }
+
+  body <- knitr::kable(x, align = align, col.names = col.names, row.names = FALSE)
+  knitr::asis_output(paste0(body, note_html))
+}
+```
+
+# Overview
+
+This article demonstrates the shared HTML and PDF defaults in `wfmR`. The HTML
+render uses the default system sans-serif stack, while the PDF render uses the
+LaTeX defaults from the package extension.
+
+The examples use ggplot2 [@wickham2016ggplot2] and the built-in `mtcars`,
+`AirPassengers`, and `volcano` datasets, so the demo can render anywhere the
+package is installed. The grammar-of-graphics framing follows
+@wilkinson2005grammar, while the prose uses ordinary Quarto markdown. Generic
+coloured labels such as [salmon]{.label-salmon}, [teal]{.label-teal},
+[purple]{.label-purple}, and [lime]{.label-lime} inherit the note highlight
+style.
+
+::: {.course-note}
+Use `mainfont` under `wfmr-html` only when a paper-like HTML note should read
+closer to the PDF output. Leave it unset for the default sans-serif article
+style.
+:::
+
+The report style is intentionally more editorial than the academic style.
+Chart titles and subtitles sit above the image, notes and sources sit below,
+and the surrounding page uses the soft Rose Pine-inspired palette for links,
+labels, tables, and callout accents.
+
+This expanded demo deliberately references each chart and the single table from
+nearby prose. In the HTML render those references become hoverable links. In the
+PDF render they provide a useful check that floats remain close to the paragraph
+that introduces them.
+
+# Palette
+
+The primary palette is ordered for categorical charts: salmon, teal, purple,
+lime, yellow, blue, and pink. Each base colour also has named tints from
+90 to 10 percent of the original colour. The palette is intentionally softer
+than publication-first categorical schemes, but it still follows the general
+principle that colour choices should be documented rather than left implicit
+[@brewer2003colorbrewer].
+
+@fig-category-bars uses every default colour. It is a simple diagnostic
+for checking the categorical order in HTML, PDF, and revealjs output. It also
+gives the PDF renderer an early figure reference before enough prose has
+accumulated to force a difficult page break.
+
+Dummy placement text follows the first reference so the PDF renderer has a
+choice to make. The text is deliberately content-light: it exists to fill the
+page between the cross-reference and the float, letting the chart move to the
+bottom of the current page or the top of the next page. In normal analysis this
+space would describe the sample, the measurement choices, and the reason the
+diagnostic appears before the substantive plots.
+
+```{r}
+#| label: fig-category-bars
+#| chart-title: "The default palette supports larger categorical charts"
+#| chart-subtitle: "Seven bars use the primary wfmR order"
+#| chart-notes: "The full seven-colour set is useful for brand consistency; for analytical comparisons, direct labels remain preferable when categories are dense."
+#| chart-source: "Illustrative data."
+#| fig-width: 7.5
+#| fig-height: 4.2
+category_df |>
+  ggplot(aes(group, value, fill = group)) +
+  geom_col(width = 0.72) +
+  scale_fill_wfm() +
+  scale_y_wfm(limits = c(0, NA)) +
+  labs(x = NULL, y = NULL, subtitle = "Value") +
+  theme_wfm() +
+  theme(legend.position = "none")
+```
+
+# Chart Metadata
+
+The chart metadata hook lets chunks use `chart-title`, `chart-subtitle`,
+`chart-notes`, and `chart-source` rather than hand-building captions. The
+rendered caption and notes stay consistent across HTML, PDF, and revealjs. This
+section uses two chart shapes to check that the metadata works across common
+report objects. @fig-scatter introduces a bivariate pattern, and @fig-boxplot
+changes the geometry while keeping the same caption structure.
+
+These objects are not intended as a substantive vehicle analysis. They are
+small, portable examples that make cross-references, captions, subtitles, notes,
+sources, and legends visible in a single document. That is useful
+because visual hierarchy is easiest to judge when the same object appears in
+ordinary surrounding prose, not only in isolated screenshots. The same logic is
+behind the classic advice to use graphics as part of the argument rather than as
+decoration [@cleveland1993visualizing; @tufte2001visual].
+
+This paragraph is another placement spacer. It is intentionally mundane and
+repetitive, because the point is to create the conditions under which LaTeX has
+to decide whether the next figure belongs at the bottom of the current page or
+the top of the next page. The object should not remain inline merely because it
+was inserted at this point in the source.
+
+A second spacer paragraph makes the test more obvious in the generated PDF. In
+a real report it might discuss robustness checks, modelling assumptions, or
+data cleaning decisions. Here it simply gives the float queue enough surrounding
+text to reveal whether the theme is using genuine top and bottom floats.
+
+```{r}
+#| label: fig-scatter
+#| chart-title: "Fuel economy is lower for heavier cars"
+#| chart-subtitle: "A small example using the built-in mtcars dataset"
+#| chart-notes: "The fitted line is illustrative. Colours come from the wfmR primary palette."
+#| chart-source: "R datasets package."
+#| fig-width: 7.5
+#| fig-height: 4.4
+mtcars_cyl |>
+  ggplot(aes(wt, mpg, colour = cyl)) +
+  geom_point(size = 2.4, alpha = 0.88) +
+  geom_smooth(
+    method = "lm",
+    formula = y ~ x,
+    se = FALSE,
+    colour = "#2F2F33",
+    linewidth = 0.6
+  ) +
+  scale_colour_wfm(name = "Cylinders") +
+  scale_y_wfm() +
+  labs(
+    x = "Weight (1,000 lbs)",
+    y = NULL,
+    subtitle = "Miles per gallon"
+  )
+```
+
+```{r}
+#| label: fig-boxplot
+#| chart-title: "Fuel economy also varies by transmission gearing"
+#| chart-subtitle: "Boxplots provide a second categorical chart example"
+#| chart-notes: "Groups are small because this is the built-in mtcars dataset."
+#| chart-source: "R datasets package."
+#| fig-width: 7.2
+#| fig-height: 4.2
+mtcars_cyl |>
+  ggplot(aes(gear, mpg, fill = gear)) +
+  geom_boxplot(width = 0.62, alpha = 0.9) +
+  scale_fill_wfm() +
+  scale_y_wfm() +
+  labs(x = "Forward gears", y = NULL, subtitle = "Miles per gallon") +
+  theme(legend.position = "none")
+```
+
+# Distribution Checks
+
+The next pair of objects puts a more crowded chart near the only table in the
+demo. @fig-density checks whether overlapping fills, legend keys, and axis
+labels remain quiet enough for report prose. @tbl-wide-vehicles is deliberately
+wide, with enough rows and columns to test HTML table styling and PDF float
+placement without filling the document with repeated table examples.
+
+The goal is practical rather than statistical. If a theme works only for one
+bar chart and one tiny summary table, it will not survive normal project work.
+Distribution plots, a wide table, and nearby narrative text create a better
+stress test for spacing and cross-reference behaviour.
+
+This dummy paragraph is here to push the next figure away from its first
+reference. The desired behaviour is not inline placement. The desired behaviour
+is a top or bottom float that remains close enough to the reference while
+keeping the surrounding text block readable.
+
+The same stress test applies to the following table. A table emitted as
+`longtable` cannot float, so the PDF version of this demo now emits a real
+LaTeX `table` environment. The table is wide enough to exercise scaling in PDF
+and horizontal breathing room in HTML, while still remaining one grouped object
+with its caption, notes, and source.
+
+```{r}
+#| label: fig-density
+#| chart-title: "Fuel economy distributions are visibly different by cylinder count"
+#| chart-subtitle: "Density curves test alpha blending, legends, and axis spacing"
+#| chart-notes: "The curves are illustrative and use the small built-in mtcars data."
+#| chart-source: "R datasets package."
+#| fig-width: 7.3
+#| fig-height: 4.1
+mtcars_cyl |>
+  ggplot(aes(mpg, fill = cyl, colour = cyl)) +
+  geom_density(alpha = 0.35, linewidth = 0.7) +
+  scale_fill_wfm(name = "Cylinders") +
+  scale_colour_wfm(name = "Cylinders") +
+  scale_y_wfm() +
+  labs(x = "Miles per gallon", y = NULL, subtitle = "Density")
+```
+
+```{r}
+#| label: tbl-wide-vehicles
+#| tbl-cap: "Wide vehicle summary for table placement"
+#| results: asis
+wfm_demo_table(
+  wide_vehicle_table,
+  caption = "Wide vehicle summary for table placement",
+  label = "tbl-wide-vehicles",
+  align = c("l", "r", "r", "l", "r", "r", "r", "r", "r", "r"),
+  notes = "The table is intentionally wide and uses all 32 cars so that PDF placement and scaling remain visible.",
+  source = "R datasets package.",
+  latex_resize = TRUE
+)
+```
+
+# Time Series
+
+The built-in `AirPassengers` series gives the article demo a non-vehicle
+example and a different visual rhythm. @fig-air-trend uses the sequentially
+ordered time index. The example is useful for checking that figure placement
+remains sensible after the earlier wide table has already entered the float
+queue.
+
+The line chart also checks that the palette can support a single primary
+accent without making every graphic look like a categorical palette showcase.
+This is the report counterpart to a typical short empirical note: a trend, a
+few paragraphs explaining why the object is present.
+
+The next two dummy paragraphs are deliberately ordinary. They create a page
+where the time-series figure can plausibly fit at the bottom, but may need to
+move to the top of the following page if the accumulated caption and notes make
+that impossible. This is the sort of case where an inline figure would leave an
+awkward hole in the prose.
+
+The extra prose remains here to keep testing placement pressure after the table
+section. The cross-reference should do the navigational work, while LaTeX
+handles whether the figure sits at the top or bottom of a nearby page.
+
+```{r}
+#| label: fig-air-trend
+#| chart-title: "Passenger counts rise sharply in the late 1950s"
+#| chart-subtitle: "Monthly totals from the built-in AirPassengers series"
+#| chart-notes: "The example is included to exercise a time-series chart in the same theme."
+#| chart-source: "R datasets package."
+#| fig-width: 7.5
+#| fig-height: 4.0
+air_df |>
+  ggplot(aes(year + (as.numeric(month) - 1) / 12, passengers)) +
+  geom_line(colour = wfm_palette()[["blue"]], linewidth = 0.85) +
+  geom_point(colour = wfm_palette()[["salmon"]], size = 1.4, alpha = 0.8) +
+  scale_y_wfm() +
+  labs(x = "Year", y = NULL, subtitle = "Passengers")
+```
+
+# Continuous Scales
+
+Sequential and diverging scales are derived from the primary colours and their
+tints using OKLab interpolation. @fig-sequential and @fig-diverging
+use the same matrix so that the sequential and diverging palettes can be
+compared directly. This final section is deliberately placed after several
+other floats so the PDF output has enough material to reveal whether later
+figures still attach themselves to nearby references.
+
+One last dummy paragraph creates space before the continuous-scale figures. The
+final two charts should still remain above or below nearby text rather than
+slipping after the references. The barrier before the bibliography is retained
+only to prevent unresolved floats from entering the reference list.
+
+```{r}
+#| label: fig-sequential
+#| chart-title: "Sequential colour uses a derived wfmR scale"
+#| chart-subtitle: "Blue, teal, and pale yellow encode ordered values"
+#| chart-notes: "The palette is sampled with OKLab interpolation."
+#| chart-source: "R datasets package."
+#| fig-width: 7.2
+#| fig-height: 4.7
+ggplot(volcano_df, aes(x, y, fill = height)) +
+  geom_tile() +
+  scale_fill_wfm_seq(palette = "blue_teal_yellow", name = "Height") +
+  coord_equal(expand = FALSE) +
+  labs(x = NULL, y = NULL) +
+  theme_wfm(grid = FALSE) +
+  theme(
+    axis.text = element_blank(),
+    legend.position = "right"
+  )
+```
+
+```{r}
+#| label: fig-diverging
+#| chart-title: "Diverging colour centres the substantive zero"
+#| chart-subtitle: "Teal and salmon sit on either side of a neutral midpoint"
+#| chart-notes: "Use the midpoint argument when zero or another reference value has substantive meaning."
+#| chart-source: "R datasets package."
+#| fig-width: 7.2
+#| fig-height: 4.7
+ggplot(volcano_df, aes(x, y, fill = signal)) +
+  geom_tile() +
+  scale_fill_wfm_div(palette = "teal_salmon", midpoint = 0, name = "Signal") +
+  coord_equal(expand = FALSE) +
+  labs(x = NULL, y = NULL) +
+  theme_wfm(grid = FALSE) +
+  theme(
+    axis.text = element_blank(),
+    legend.position = "right"
+  )
+```
+
+```{=latex}
+\FloatBarrier
+```
+
+# References

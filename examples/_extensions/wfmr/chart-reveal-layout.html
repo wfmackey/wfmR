@@ -1,0 +1,56 @@
+<script>
+(function () {
+  function layoutWfmrRevealCharts() {
+    document.querySelectorAll(".reveal section.slide > .cell.fig-cap-location-top").forEach(function (cell) {
+      var notes = cell.querySelector(".chart-notes, .figure-notes");
+      var image = cell.nextElementSibling;
+      var caption = image ? image.nextElementSibling : null;
+
+      if (!notes || !image || !caption) {
+        return;
+      }
+
+      if (!image.matches("img.quarto-figure-center, img.r-stretch")) {
+        return;
+      }
+
+      if (!caption.matches("p.caption")) {
+        return;
+      }
+
+      var slide = cell.closest("section.slide");
+      if (!slide) {
+        return;
+      }
+
+      slide.classList.add("wfmr-chart-slide");
+      caption.classList.add("wfmr-chart-caption");
+      image.classList.add("wfmr-chart-image");
+      cell.classList.add("wfmr-chart-notes-cell");
+
+      slide.insertBefore(caption, image);
+      image.after(cell);
+    });
+  }
+
+  function relayoutReveal() {
+    layoutWfmrRevealCharts();
+    if (window.Reveal && typeof window.Reveal.layout === "function") {
+      window.Reveal.layout();
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", relayoutReveal);
+  } else {
+    relayoutReveal();
+  }
+
+  window.addEventListener("load", relayoutReveal);
+
+  if (window.Reveal && typeof window.Reveal.on === "function") {
+    window.Reveal.on("ready", relayoutReveal);
+    window.Reveal.on("slidechanged", relayoutReveal);
+  }
+})();
+</script>

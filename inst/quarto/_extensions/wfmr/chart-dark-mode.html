@@ -1,0 +1,157 @@
+<script>
+(function() {
+  const BASE64_PREFIX = "data:image/svg+xml;base64,";
+  const DATA_PREFIX = "data:image/svg+xml";
+
+  const replacements = [
+    [/rgb\(\s*100%\s*,\s*100%\s*,\s*100%\s*\)/gi, "transparent"],
+    [/rgb\(\s*255\s*,\s*255\s*,\s*255\s*\)/gi, "transparent"],
+    [/rgb\(\s*92\.156863%\s*,\s*92\.156863%\s*,\s*92\.156863%\s*\)/gi, "rgb(28%, 28%, 28%)"],
+    [/rgba?\(\s*0(?:\.0+)?%\s*,\s*0(?:\.0+)?%\s*,\s*0(?:\.0+)?%(?:\s*,\s*1)?\s*\)/gi, "rgb(88%, 88%, 88%)"],
+    [/rgba?\(\s*0\s*,\s*0\s*,\s*0(?:\s*,\s*1)?\s*\)/gi, "rgb(88%, 88%, 88%)"],
+    [/rgb\(\s*10\.196078%\s*,\s*10\.196078%\s*,\s*10\.196078%\s*\)/gi, "rgb(90%, 90%, 90%)"],
+    [/rgb\(\s*20%\s*,\s*20%\s*,\s*20%\s*\)/gi, "rgb(86%, 86%, 86%)"],
+    [/rgb\(\s*30\.196078%\s*,\s*30\.196078%\s*,\s*30\.196078%\s*\)/gi, "rgb(78%, 78%, 78%)"],
+    [/rgb\(\s*33\.333333%\s*,\s*33\.333333%\s*,\s*33\.333333%\s*\)/gi, "rgb(76%, 76%, 76%)"],
+    [/rgb\(\s*47\s*,\s*47\s*,\s*51\s*\)/gi, "#E6E6E6"],
+    [/rgb\(\s*87\s*,\s*82\s*,\s*121\s*\)/gi, "#E0DEF4"],
+    [/rgb\(\s*94\s*,\s*89\s*,\s*102\s*\)/gi, "#BDB8CC"],
+    [/rgb\(\s*18\.431373%\s*,\s*18\.431373%\s*,\s*20%\s*\)/gi, "#E6E6E6"],
+    [/rgb\(\s*34\.117647%\s*,\s*32\.156863%\s*,\s*47\.45098%\s*\)/gi, "#E0DEF4"],
+    [/rgb\(\s*36\.862745%\s*,\s*34\.901961%\s*,\s*40%\s*\)/gi, "#BDB8CC"],
+    [/rgb\(\s*47\.45098%\s*,\s*45\.882353%\s*,\s*57\.647059%\s*\)/gi, "#908CAA"],
+    [/rgb\(\s*85\.098039%\s*,\s*82\.745098%\s*,\s*81\.176471%\s*\)/gi, "#44415A"],
+    [/rgb\(\s*90\.196078%\s*,\s*85\.490196%\s*,\s*81\.960784%\s*\)/gi, "#44415A"],
+    [/#FFFFFF/gi, "transparent"],
+    [/#FFF\b/gi, "transparent"],
+    [/#000000/gi, "#E0E0E0"],
+    [/#000\b/gi, "#E0E0E0"],
+    [/#1A1A1A/gi, "#E6E6E6"],
+    [/#333333/gi, "#DBDBDB"],
+    [/#555555/gi, "#C2C2C2"],
+    [/#2F2F33/gi, "#E6E6E6"],
+    [/#5E5966/gi, "#BDB8CC"],
+    [/#575279/gi, "#E0DEF4"],
+    [/#797593/gi, "#908CAA"],
+    [/#E6DAD1/gi, "#44415A"],
+    [/#D9D3CF/gi, "#44415A"],
+    [/#E6E0DD/gi, "#393552"],
+    [/#F7F0EA/gi, "#232136"],
+    [/((?:fill|stroke)\s*[:=]\s*["']?)black(["']?)/gi, "$1#E0DEF4$2"]
+  ];
+
+  function toBase64(text) {
+    const bytes = new TextEncoder().encode(text);
+    let binary = "";
+    bytes.forEach((byte) => {
+      binary += String.fromCharCode(byte);
+    });
+    return btoa(binary);
+  }
+
+  function fromBase64(text) {
+    const binary = atob(text);
+    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+    return new TextDecoder().decode(bytes);
+  }
+
+  function darkSvg(svg) {
+    const replaced = replacements.reduce(
+      (current, pair) => current.replace(pair[0], pair[1]),
+      svg
+    );
+
+    return replaced.replace(
+      /rgb\(\s*([0-9]+(?:\.[0-9]+)?)%\s*,\s*([0-9]+(?:\.[0-9]+)?)%\s*,\s*([0-9]+(?:\.[0-9]+)?)%\s*\)/gi,
+      (match, red, green, blue) => {
+        const values = [Number(red), Number(green), Number(blue)];
+        const spread = Math.max(...values) - Math.min(...values);
+        const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+        if (spread > 8 || mean > 65) {
+          return match;
+        }
+        if (mean < 25) {
+          return "#E6E6E6";
+        }
+        if (mean < 45) {
+          return "#CFCFCF";
+        }
+        return "#BDBDBD";
+      }
+    );
+  }
+
+  function decodeSvgData(source) {
+    if (!source || !source.startsWith(DATA_PREFIX)) {
+      return null;
+    }
+
+    const comma = source.indexOf(",");
+    if (comma < 0) {
+      return null;
+    }
+
+    const metadata = source.slice(0, comma).toLowerCase();
+    const payload = source.slice(comma + 1);
+
+    return metadata.includes(";base64")
+      ? fromBase64(payload)
+      : decodeURIComponent(payload);
+  }
+
+  function prepareImage(img) {
+    const source = img.getAttribute("src") || img.src;
+    if (img.dataset.wfmrSvgDark || !source.startsWith(DATA_PREFIX)) {
+      return;
+    }
+
+    try {
+      const svg = decodeSvgData(source);
+      if (!svg.includes("<svg")) {
+        return;
+      }
+
+      img.dataset.wfmrSvgLight = source;
+      img.dataset.wfmrSvgDark = BASE64_PREFIX + toBase64(darkSvg(svg));
+      img.classList.add("wfmr-svg-chart");
+    } catch (error) {
+      return;
+    }
+  }
+
+  function prepareAll() {
+    document.querySelectorAll('img[src^="data:image/svg+xml"]').forEach(prepareImage);
+  }
+
+  function applyMode() {
+    const dark = document.body.classList.contains("quarto-dark");
+    document.querySelectorAll("img[data-wfmr-svg-dark]").forEach((img) => {
+      const target = dark ? img.dataset.wfmrSvgDark : img.dataset.wfmrSvgLight;
+      if (img.src !== target) {
+        img.src = target;
+      }
+    });
+  }
+
+  function update() {
+    prepareAll();
+    applyMode();
+  }
+
+  function ready() {
+    update();
+    new MutationObserver(update).observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class"],
+      childList: true,
+      subtree: true
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", ready);
+  } else {
+    ready();
+  }
+})();
+</script>
