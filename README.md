@@ -68,30 +68,32 @@ wfm_palette_options()[, c("type", "name", "generator", "notes")]
 #> 1    discrete            primary     fixed
 #> 2    discrete               wong     fixed
 #> 3    discrete        colourblind     fixed
-#> 4  sequential   blue_teal_yellow   anchors
-#> 5  sequential  blue_green_yellow   anchors
-#> 6  sequential purple_pink_salmon   anchors
-#> 7  sequential   teal_lime_yellow   anchors
-#> 8  sequential   blue_purple_pink   anchors
-#> 9   diverging        teal_salmon   anchors
-#> 10  diverging        blue_yellow   anchors
-#> 11  diverging         green_pink   anchors
-#> 12  diverging        purple_lime   anchors
-#> 13  diverging        blue_salmon   anchors
+#> 4    discrete              minou     fixed
+#> 5  sequential   blue_teal_yellow   anchors
+#> 6  sequential  blue_green_yellow   anchors
+#> 7  sequential purple_pink_salmon   anchors
+#> 8  sequential   teal_lime_yellow   anchors
+#> 9  sequential   blue_purple_pink   anchors
+#> 10  diverging        teal_salmon   anchors
+#> 11  diverging        blue_yellow   anchors
+#> 12  diverging         green_pink   anchors
+#> 13  diverging        purple_lime   anchors
+#> 14  diverging        blue_salmon   anchors
 #>                                                                          notes
 #> 1                         Default soft Rose Pine-inspired wfmR chart sequence.
 #> 2                               Original Wong/Colour Universal Design palette.
 #> 3          Colour-blind-friendly publication backup based on the Wong palette.
-#> 4                        Default blue-to-teal-to-pale-yellow sequential scale.
-#> 5                    Blue-to-green-to-pale-yellow scale for ordered intensity.
-#> 6                    Purple-to-pink-to-salmon scale with a pale warm endpoint.
-#> 7                   Teal-to-lime-to-pale-yellow scale for positive quantities.
-#> 8                             Blue-to-purple-to-pink scale for dense heatmaps.
-#> 9                                      Default teal-to-salmon diverging scale.
-#> 10               Blue-to-yellow diverging scale with high endpoint separation.
-#> 11 Green-to-pink diverging scale; clearer than teal/pink under CVD simulation.
-#> 12                                             Purple-to-lime diverging scale.
-#> 13                                             Blue-to-salmon diverging scale.
+#> 4                                        Six-colour Minou categorical palette.
+#> 5                        Default blue-to-teal-to-pale-yellow sequential scale.
+#> 6                    Blue-to-green-to-pale-yellow scale for ordered intensity.
+#> 7                    Purple-to-pink-to-salmon scale with a pale warm endpoint.
+#> 8                   Teal-to-lime-to-pale-yellow scale for positive quantities.
+#> 9                             Blue-to-purple-to-pink scale for dense heatmaps.
+#> 10                                     Default teal-to-salmon diverging scale.
+#> 11               Blue-to-yellow diverging scale with high endpoint separation.
+#> 12 Green-to-pink diverging scale; clearer than teal/pink under CVD simulation.
+#> 13                                             Purple-to-lime diverging scale.
+#> 14                                             Blue-to-salmon diverging scale.
 ```
 
 ## Categorical Palettes
@@ -100,6 +102,23 @@ Discrete chart scales use `scale_fill_wfm()` or `scale_colour_wfm()`.
 The primary palette is the package default; the Wong/Colour Universal
 Design palette is retained as a colour-blind-friendly backup via
 `palette = "colourblind"` or `palette = "wong"`.
+
+For colourblind-safe output there is a single switch.
+`wfm_colourblind()` substitutes the Wong palette wherever the primary
+palette would be used, including the defaults of `wfm_palette()` and the
+wfm discrete scales, so one line in a setup chunk converts a whole
+document:
+
+``` r
+wfm_colourblind()       # primary palette requests now return the Wong palette
+wfm_colourblind(FALSE)  # back to the primary palette
+```
+
+The switch stores its state in the `wfmR.colourblind` option, so
+`options(wfmR.colourblind = TRUE)` in an `.Rprofile` does the same
+thing. Palettes requested by name (`"wong"`, `"minou"`), the named
+colours from `wfm_colours()`, the exported constants, and the sequential
+and diverging scales are unchanged.
 
 ### Primary
 

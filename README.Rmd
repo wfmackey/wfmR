@@ -126,6 +126,22 @@ primary palette is the package default; the Wong/Colour Universal Design palette
 is retained as a colour-blind-friendly backup via `palette = "colourblind"` or
 `palette = "wong"`.
 
+For colourblind-safe output there is a single switch. `wfm_colourblind()`
+substitutes the Wong palette wherever the primary palette would be used,
+including the defaults of `wfm_palette()` and the wfm discrete scales, so one
+line in a setup chunk converts a whole document:
+
+``` r
+wfm_colourblind()       # primary palette requests now return the Wong palette
+wfm_colourblind(FALSE)  # back to the primary palette
+```
+
+The switch stores its state in the `wfmR.colourblind` option, so
+`options(wfmR.colourblind = TRUE)` in an `.Rprofile` does the same thing.
+Palettes requested by name (`"wong"`, `"minou"`), the named colours from
+`wfm_colours()`, the exported constants, and the sequential and diverging
+scales are unchanged.
+
 ```{r categorical-data, include=FALSE}
 primary_values <- c(31, 27, 24, 21, 18, 16, 13)
 publication_values <- c(31, 27, 24, 21, 18, 16, 13, 10)

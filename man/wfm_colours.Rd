@@ -23,7 +23,9 @@ The default chart palette is the primary wfmR palette: a soft Rose
 Pine-inspired sequence of salmon, teal, purple, moss, gold, blue,
 and pink. The original Wong/Colour Universal Design palette remains
 available as \code{palette = "wong"} or \code{palette = "colourblind"}. The
-six-colour Minou palette is available as \code{palette = "minou"}.
+six-colour Minou palette is available as \code{palette = "minou"}. A single
+switch, \code{\link[=wfm_colourblind]{wfm_colourblind()}}, substitutes the Wong palette wherever the
+primary palette would be used.
 }
 \examples{
 wfm_colours()

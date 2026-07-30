@@ -4,7 +4,9 @@
 #' Pine-inspired sequence of salmon, teal, purple, moss, gold, blue,
 #' and pink. The original Wong/Colour Universal Design palette remains
 #' available as `palette = "wong"` or `palette = "colourblind"`. The
-#' six-colour Minou palette is available as `palette = "minou"`.
+#' six-colour Minou palette is available as `palette = "minou"`. A single
+#' switch, [wfm_colourblind()], substitutes the Wong palette wherever the
+#' primary palette would be used.
 #'
 #' @param ... Optional colour names to select.
 #' @param semantic If `TRUE`, return the four semantic colours used for
@@ -83,6 +85,51 @@ wfm_palette <- function(n = NULL, reverse = FALSE, palette = "primary") {
 
   stats::setNames(rep_len(unname(pal), n), rep_len(names(pal), n))
 }
+
+#' Switch the chart palette to the colourblind-safe palette
+#'
+#' One switch for colourblind-safe output. While it is on, every request
+#' for the primary chart palette -- including the defaults of
+#' [wfm_palette()], [scale_colour_wfm()], and [scale_fill_wfm()] --
+#' returns the Wong/Colour Universal Design palette instead. One line in
+#' a setup chunk therefore converts a whole document.
+#'
+#' The switch stores its state in the `wfmR.colourblind` option, so
+#' `options(wfmR.colourblind = TRUE)` in a script or `.Rprofile` does the
+#' same thing. Because the wfm scales resolve their palette when a chart
+#' is drawn, the switch also applies to plot objects built before it was
+#' turned on.
+#'
+#' Palettes requested by another name (`"wong"`, `"colourblind"`,
+#' `"minou"`) are returned as asked. The named colour lookup
+#' [wfm_colours()], the exported colour constants, and the sequential and
+#' diverging scales are unchanged; for a diverging scale under
+#' colour-vision deficiency, prefer `palette = "green_pink"`.
+#'
+#' @param on If `TRUE`, use the Wong palette wherever the primary palette
+#'   would be used. If `FALSE`, restore the primary palette.
+#'
+#' @return The previous value of the switch, invisibly.
+#' @export
+#'
+#' @examples
+#' wfm_colourblind()
+#' wfm_palette()
+#' wfm_colourblind(FALSE)
+#' wfm_palette()
+wfm_colourblind <- function(on = TRUE) {
+  if (!is.logical(on) || length(on) != 1 || is.na(on)) {
+    stop("`on` must be TRUE or FALSE.", call. = FALSE)
+  }
+
+  old <- isTRUE(getOption("wfmR.colourblind"))
+  options(wfmR.colourblind = on)
+  invisible(old)
+}
+
+#' @rdname wfm_colourblind
+#' @export
+wfm_colorblind <- wfm_colourblind
 
 #' List available wfmR palettes
 #'
@@ -907,6 +954,9 @@ wfm_semantic_text <- c(
 
 wfm_get_discrete_palette <- function(palette = "primary") {
   palette <- wfm_match_palette_name(palette, names(wfm_discrete_palettes), "discrete")
+  if (identical(palette, "primary") && isTRUE(getOption("wfmR.colourblind"))) {
+    palette <- "colourblind"
+  }
   wfm_discrete_palettes[[palette]]$colours
 }
 

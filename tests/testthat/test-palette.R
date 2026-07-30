@@ -154,3 +154,39 @@ test_that("diverging scales have neutral midpoint and separated endpoints", {
     )
   }
 })
+
+test_that("wfm_colourblind() swaps the primary palette for the Wong palette", {
+  old <- getOption("wfmR.colourblind")
+  on.exit(options(wfmR.colourblind = old), add = TRUE)
+
+  options(wfmR.colourblind = NULL)
+  expect_false(wfm_colourblind())
+  expect_equal(wfm_palette(), wfm_colours(palette = "wong"))
+  expect_equal(wfm_palette(palette = "primary"), wfm_colours(palette = "wong"))
+  expect_equal(wfm_palette(palette = "minou"), wfm_colours(palette = "minou"))
+  expect_equal(unname(wfm_colours("teal")), wfm_teal)
+
+  expect_true(wfm_colourblind(FALSE))
+  expect_equal(wfm_palette(), wfm_colours(palette = "primary"))
+  expect_error(wfm_colourblind(NA), "TRUE or FALSE")
+})
+
+test_that("wfm scales follow the colourblind switch at draw time", {
+  old <- getOption("wfmR.colourblind")
+  on.exit(options(wfmR.colourblind = old), add = TRUE)
+
+  p <- ggplot2::ggplot(
+    data.frame(g = c("a", "b"), y = c(1, 2)),
+    ggplot2::aes(g, y, fill = g)
+  ) +
+    ggplot2::geom_col() +
+    scale_fill_wfm()
+
+  options(wfmR.colourblind = TRUE)
+  fills <- unique(ggplot2::ggplot_build(p)$data[[1]]$fill)
+  expect_setequal(fills, unname(wfm_colours(palette = "wong"))[1:2])
+
+  options(wfmR.colourblind = FALSE)
+  fills <- unique(ggplot2::ggplot_build(p)$data[[1]]$fill)
+  expect_setequal(fills, unname(wfm_colours(palette = "primary"))[1:2])
+})
