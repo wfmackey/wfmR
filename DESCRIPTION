@@ -18,12 +18,16 @@ Imports:
     farver,
     ggplot2,
     grDevices,
+    grid,
     rlang,
     scales,
+    svglite,
     tools,
-    utils
+    utils,
+    vctrs
 Suggests:
     knitr,
+    png,
     ragg,
     rmarkdown,
     testthat (>= 3.0.0),

@@ -107,10 +107,14 @@ install_chart_chunk_options <- function(style = c("nice", "academic"),
 #' This is the one-line setup helper intended for Quarto setup chunks. It sets
 #' the ggplot2 theme, installs chart metadata chunk options, and configures
 #' transparent SVG/PDF output depending on the active Quarto format.
+#' SVG uses `svglite`, PDF uses Cairo, and PNG uses `ragg` when installed.
+#' Cairo graphics support is required for PDF charts. Install Source Serif Pro
+#' as a system font, or choose another installed font with `base_family`.
 #'
 #' @param base_size Base chart font size. If `NULL`, uses 12 for LaTeX/PDF and
 #'   11 otherwise.
-#' @param base_family Base chart font family.
+#' @param base_family Base chart font family. Defaults to `"Source Serif Pro"`,
+#'   matching the text font in the bundled Quarto PDF styles.
 #' @param set_theme If `TRUE`, set [theme_wfm()] as the active ggplot2 theme.
 #' @param style Chart caption style. `"nice"` is the default and places chart
 #'   headings above figures; `"academic"` uses formal below-figure captions.
@@ -120,7 +124,7 @@ install_chart_chunk_options <- function(style = c("nice", "academic"),
 #' @return A list of the settings applied, invisibly.
 #' @export
 wfm_chart_defaults <- function(base_size = NULL,
-                               base_family = "",
+                               base_family = "Source Serif Pro",
                                set_theme = TRUE,
                                style = c("nice", "academic"),
                                transparent = TRUE,
@@ -132,19 +136,27 @@ wfm_chart_defaults <- function(base_size = NULL,
     base_size <- if (has_knitr && knitr::is_latex_output()) 12 else 11
   }
 
+  if (has_knitr) {
+    device <- if (knitr::is_html_output()) {
+      "svglite"
+    } else if (knitr::is_latex_output()) {
+      if (!capabilities("cairo")) {
+        stop("Cairo graphics support is required for wfmR PDF charts.",
+             call. = FALSE)
+      }
+      "cairo_pdf"
+    } else if (requireNamespace("ragg", quietly = TRUE)) {
+      "ragg_png"
+    } else {
+      "png"
+    }
+  }
+
   if (isTRUE(set_theme)) {
     wfm_set_theme(base_size = base_size, base_family = base_family)
   }
 
   if (has_knitr) {
-    device <- if (knitr::is_html_output()) {
-      "svg"
-    } else if (knitr::is_latex_output()) {
-      "pdf"
-    } else {
-      "png"
-    }
-
     dev_args <- if (isTRUE(transparent)) list(bg = "transparent") else NULL
     knitr::opts_chunk$set(dev = device, dev.args = dev_args)
     install_chart_chunk_options(style = style, default_caption_location = default_caption_location)

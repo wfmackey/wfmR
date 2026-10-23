@@ -4,12 +4,18 @@
 #' minimal grid, muted axes, strong titles, and clean figure notes/captions.
 #'
 #' @param base_size Base font size.
-#' @param base_family Base font family.
+#' @param base_family Base font family. Defaults to `"Source Serif Pro"`,
+#'   the text font used by the bundled Quarto PDF styles.
 #' @param grid If `FALSE`, remove major grid lines.
+#'
+#' @details
+#' Install Source Serif Pro as a system font to match the bundled Quarto PDF
+#' documents. Graphics devices can silently substitute another font when it
+#' is unavailable. Set `base_family` to use a different installed font.
 #'
 #' @return A ggplot2 theme.
 #' @export
-theme_wfm <- function(base_size = 11, base_family = "", grid = TRUE) {
+theme_wfm <- function(base_size = 11, base_family = "Source Serif Pro", grid = TRUE) {
   chart_text <- "#2F2F33"
   muted_text <- "#5E5966"
   major_grid <- if (isTRUE(grid)) {
@@ -93,7 +99,7 @@ scale_y_wfm <- function(...,
 #'
 #' @return The previous ggplot2 theme, invisibly.
 #' @export
-wfm_set_theme <- function(base_size = 11, base_family = "", grid = TRUE) {
+wfm_set_theme <- function(base_size = 11, base_family = "Source Serif Pro", grid = TRUE) {
   old <- ggplot2::theme_set(theme_wfm(base_size, base_family, grid))
   invisible(old)
 }

@@ -4,12 +4,13 @@
 \alias{wfm_set_theme}
 \title{Set wfmR as the active ggplot2 theme}
 \usage{
-wfm_set_theme(base_size = 11, base_family = "", grid = TRUE)
+wfm_set_theme(base_size = 11, base_family = "Source Serif Pro", grid = TRUE)
 }
 \arguments{
 \item{base_size}{Base font size.}
 
-\item{base_family}{Base font family.}
+\item{base_family}{Base font family. Defaults to \code{"Source Serif Pro"},
+the text font used by the bundled Quarto PDF styles.}
 
 \item{grid}{If \code{FALSE}, remove major grid lines.}
 }

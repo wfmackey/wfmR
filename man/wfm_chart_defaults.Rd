@@ -6,7 +6,7 @@
 \usage{
 wfm_chart_defaults(
   base_size = NULL,
-  base_family = "",
+  base_family = "Source Serif Pro",
   set_theme = TRUE,
   style = c("nice", "academic"),
   transparent = TRUE,
@@ -17,7 +17,8 @@ wfm_chart_defaults(
 \item{base_size}{Base chart font size. If \code{NULL}, uses 12 for LaTeX/PDF and
 11 otherwise.}
 
-\item{base_family}{Base chart font family.}
+\item{base_family}{Base chart font family. Defaults to \code{"Source Serif Pro"},
+matching the text font in the bundled Quarto PDF styles.}
 
 \item{set_theme}{If \code{TRUE}, set \code{\link[=theme_wfm]{theme_wfm()}} as the active ggplot2 theme.}
 
@@ -35,4 +36,7 @@ A list of the settings applied, invisibly.
 This is the one-line setup helper intended for Quarto setup chunks. It sets
 the ggplot2 theme, installs chart metadata chunk options, and configures
 transparent SVG/PDF output depending on the active Quarto format.
+SVG uses \code{svglite}, PDF uses Cairo, and PNG uses \code{ragg} when installed.
+Cairo graphics support is required for PDF charts. Install Source Serif Pro
+as a system font, or choose another installed font with \code{base_family}.
 }

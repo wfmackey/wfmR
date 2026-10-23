@@ -2,41 +2,88 @@
 % Please edit documentation in R/export.R
 \name{wfm_save_plot}
 \alias{wfm_save_plot}
-\title{Save a plot with wfmR defaults}
+\title{Save a plot at wfmR document dimensions}
 \usage{
 wfm_save_plot(
-  filename,
   plot = ggplot2::last_plot(),
-  width = 7,
-  height = 4.5,
+  path,
+  width = "full",
+  height = NULL,
   units = "in",
   dpi = 320,
-  bg = "transparent",
+  background = NULL,
   device = NULL,
-  ...
+  ...,
+  formats = c("pdf", "svg", "png")
 )
 }
 \arguments{
-\item{filename}{Output filename.}
+\item{plot}{A single ggplot object. Defaults to \code{\link[ggplot2:get_last_plot]{ggplot2::last_plot()}}.
+Export components of a patchwork composition separately.}
 
-\item{plot}{Plot to save. Defaults to \code{\link[ggplot2:get_last_plot]{ggplot2::last_plot()}}.}
+\item{path}{Output path including the file stem, for example
+\code{"figures/cars"}. Missing directories are created. For \code{wfm_save_plot()},
+a suffix such as \code{.png} selects that format and overrides \code{formats}.
+For \code{wfm_save_all()}, the final suffix is removed before saving all formats.}
 
-\item{width, height}{Plot dimensions.}
+\item{width}{Plot width: \code{"full"} (143.96 mm), \code{"half"} (71.98 mm), or a
+positive number in \code{units}.}
 
-\item{units}{Units for \code{width} and \code{height}.}
+\item{height}{Plot height in \code{units}. If \code{NULL}, uses \code{width * 4.5 / 7}.}
 
-\item{dpi}{Resolution for bitmap output.}
+\item{units}{Units for numeric dimensions: \code{"in"}, \code{"cm"}, \code{"mm"} or \code{"px"}.
+Preset widths are converted to these units, using \code{dpi} for pixels.}
 
-\item{bg}{Plot background passed to \code{\link[ggplot2:ggsave]{ggplot2::ggsave()}}.}
+\item{dpi}{Bitmap resolution in dots per inch. Defaults to 320.}
 
-\item{device}{Optional graphics device.}
+\item{background}{Background colour: \code{NULL} (transparent), a hex code in
+\verb{#RRGGBB} or \verb{#RRGGBBAA} form, or a wfmR colour name such as \code{"salmon"}
+or \code{"teal"}. See \code{\link[=wfm_colours]{wfm_colours()}} for names. Exported colour constants such
+as \code{wfm_teal20} also work. This replaces the outer plot background;
+panel backgrounds and other theme settings are retained.}
+
+\item{device}{Optional graphics device override, for a single format only.}
 
 \item{...}{Additional arguments passed to \code{\link[ggplot2:ggsave]{ggplot2::ggsave()}}.}
+
+\item{formats}{File formats to save when \code{path} has no suffix. Defaults to
+\code{c("pdf", "svg", "png")}.}
 }
 \value{
-The filename, invisibly.
+A named character vector of output paths, invisibly.
 }
 \description{
-Defaults to transparent backgrounds and uses \code{ragg} for bitmap output when
-it is available.
+Saves PDF, SVG and PNG files with the same dimensions. A file extension in
+\code{path} selects a single format instead. Use \code{width = "full"} or
+\code{width = "half"} for the text width of the bundled wfmR Quarto PDF documents,
+or supply numeric dimensions.
+}
+\details{
+Both bundled PDF styles use A4 paper with 1.3-inch left and right margins:
+\code{210 - 2 * 1.3 * 25.4 = 143.96} mm of text width. Half width is exactly half
+of that; allow for any gutter in a multi-column layout by supplying a numeric
+width. The default height preserves the original helper's 7:4.5 aspect ratio.
+HTML layouts are responsive; these presets specify the exported figure size,
+not a fixed browser width. Use numeric dimensions if document margins differ.
+
+SVG uses \code{svglite}; PNG uses \code{ragg} when installed. PDF uses Cairo when
+available, otherwise the standard R PDF device. Existing output files are
+overwritten, as with \code{\link[ggplot2:ggsave]{ggplot2::ggsave()}}. A suffix can also select another
+format supported by \code{ggsave()}, such as \code{.jpg} or \code{.tiff}; some formats cannot
+retain transparency.
+
+Layer data functions and statistical transformations are evaluated once per
+call, so all formats use the same data and computed positions. The original
+plot is not changed.
+}
+\examples{
+p <- ggplot2::ggplot(mtcars, ggplot2::aes(wt, mpg)) +
+  ggplot2::geom_point() + theme_wfm()
+wfm_save_plot(p, path = file.path(tempdir(), "cars"))
+wfm_save_plot(p, path = file.path(tempdir(), "cars-half.png"),
+              width = "half", height = 55, units = "mm",
+              background = "salmon")
+}
+\seealso{
+\code{\link[=wfm_export_plot_data]{wfm_export_plot_data()}}, \code{\link[=wfm_save_all]{wfm_save_all()}}
 }

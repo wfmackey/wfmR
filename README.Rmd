@@ -328,6 +328,60 @@ div_df |>
   )
 ```
 
+## Saving plots and chart data
+
+Charts use Source Serif Pro, matching the bundled Quarto PDF body font.
+Install its regular, italic, bold and bold italic styles as system fonts.
+To choose another font, use `theme_wfm(base_family = "...")` or supply
+`base_family` to `wfm_set_theme()` or `wfm_chart_defaults()`.
+
+
+```r
+wfm_save_plot(p, path = "figures/earnings")
+wfm_export_plot_data(p, path = "figures/earnings.csv")
+wfm_save_all(p, path = "figures/earnings")
+
+# A file suffix selects one format; use HEX or a wfmR colour name.
+wfm_save_plot(p, path = "figures/earnings.png", background = "#FFFFFF")
+wfm_save_plot(p, path = "figures/earnings-teal.svg", background = "teal")
+
+# Half width, with a specified height in millimetres
+wfm_save_all(p, path = "figures/earnings-half",
+             width = "half", height = 60, units = "mm")
+```
+
+`path` supplies the directory and filename stem. Without a suffix,
+`wfm_save_plot()` writes PDF, SVG and PNG files. A `.pdf`, `.svg` or `.png` suffix
+selects one format. `wfm_export_plot_data()` writes CSV, and `wfm_save_all()`
+writes all four formats. These two functions replace any supplied suffix, so
+`wfm_save_all(p, path = "figures/earnings.png")` writes `earnings.pdf`,
+`earnings.svg`, `earnings.png` and `earnings.csv`.
+
+The default `background = NULL` exports a transparent background. Supply a HEX
+colour (`#RRGGBB` or `#RRGGBBAA`) or a wfmR palette name such as `"teal"`.
+Exported colour constants also work, for example `background = wfm_teal20`.
+Each function returns its output paths invisibly. Missing directories are
+created; existing files are overwritten.
+
+The default `width = "full"` is 143.96 mm, matching the text width of both bundled
+Quarto PDF styles. `width = "half"` is 71.98 mm before allowing for a layout
+gutter. Numeric widths and heights accept inches, centimetres, millimetres or
+pixels. If omitted, height uses the original 7:4.5 aspect ratio. HTML layouts are
+responsive; use numeric widths if your document uses different margins.
+
+CSV export selects the original columns used by layer mappings and facets,
+including colour, fill, group, weights and variables inside expressions such as
+`log(income)`. It keeps the inputs needed to recalculate statistics, including
+repeated observations, rather than exporting computed coordinates or colour
+codes. Unused source columns are excluded.
+
+When layers use different datasets, `.wfm_layer` identifies the layer and
+`.wfm_row` preserves its row order. Keep the plot code alongside the CSV: the
+code supplies transformations, statistical settings, scales and styling. CSV
+does not preserve R classes or factor levels. For mappings that use external
+vectors or opaque data-dependent helpers, first create explicit data columns.
+See `?wfm_export_plot_data` for the full export contract.
+
 ## Quarto
 
 Create a new Quarto document and install the bundled extension beside it:

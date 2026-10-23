@@ -4,12 +4,13 @@
 \alias{theme_wfm}
 \title{wfmR ggplot2 theme}
 \usage{
-theme_wfm(base_size = 11, base_family = "", grid = TRUE)
+theme_wfm(base_size = 11, base_family = "Source Serif Pro", grid = TRUE)
 }
 \arguments{
 \item{base_size}{Base font size.}
 
-\item{base_family}{Base font family.}
+\item{base_family}{Base font family. Defaults to \code{"Source Serif Pro"},
+the text font used by the bundled Quarto PDF styles.}
 
 \item{grid}{If \code{FALSE}, remove major grid lines.}
 }
@@ -19,4 +20,9 @@ A ggplot2 theme.
 \description{
 A transparent-background theme based on the course-note chart convention:
 minimal grid, muted axes, strong titles, and clean figure notes/captions.
+}
+\details{
+Install Source Serif Pro as a system font to match the bundled Quarto PDF
+documents. Graphics devices can silently substitute another font when it
+is unavailable. Set \code{base_family} to use a different installed font.
 }
