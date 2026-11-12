@@ -7,6 +7,7 @@ contributes:
     html:
       filters:
         - chart-notes.lua
+        - heading-six.lua
       include-after-body:
         - chart-dark-mode.html
       crossref:
@@ -34,6 +35,7 @@ contributes:
       df-print: paged
     pdf:
       filters:
+        - heading-six.lua
         - at: post-render
           path: chart-notes.lua
       crossref:

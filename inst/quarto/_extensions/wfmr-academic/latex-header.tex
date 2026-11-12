@@ -18,8 +18,16 @@
 \setlength{\droptitle}{0cm}
 \usepackage{titlesec}
 \titleformat*{\section}{\centering\large\bfseries\color{black}}
-\titleformat*{\subsection}{\bfseries\color{black}}
-\titleformat{\paragraph}[runin]{\itshape\color{black}}{}{}{}
+% Second-level headings sit one point above the 11pt body text.
+\titleformat*{\subsection}{\fontsize{12pt}{14pt}\selectfont\bfseries\color{black}}
+% Fourth-level headings: never numbered, bold, on their own line, with
+% almost no space before the paragraph that follows.
+\titleformat{\paragraph}[block]{\normalfont\normalsize\bfseries\color{black}}{}{0pt}{}
+\titlespacing*{\paragraph}{0pt}{3ex plus 1ex minus .2ex}{0.2ex}
+% Fifth-level headings: the same, in italic rather than bold.
+\titleformat{\subparagraph}[block]{\normalfont\normalsize\itshape\color{black}}{}{0pt}{}
+\titlespacing*{\subparagraph}{0pt}{3ex plus 1ex minus .2ex}{0.2ex}
+% Sixth-level headings are run in by heading-six.lua as "Heading.---Text".
 \usepackage{float}
 \usepackage{fancyhdr}
 \usepackage{etoolbox}

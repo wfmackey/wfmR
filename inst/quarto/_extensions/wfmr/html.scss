@@ -353,3 +353,33 @@ body.quarto-dark .quarto-float-caption {
 body.quarto-dark .quarto-float-caption .chart-subtitle {
   color: var(--wfmr-subtle);
 }
+
+// Fourth-level headings: never numbered, bold, on their own line, with
+// almost no space before the paragraph that follows. Fifth-level headings
+// are the same in italic. Sixth-level headings are run into their
+// paragraph by heading-six.lua.
+h4,
+.h4,
+h5,
+.h5 {
+  font-size: 1rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.1rem;
+}
+
+h4,
+.h4 {
+  font-style: normal;
+  font-weight: 700;
+}
+
+h5,
+.h5 {
+  font-style: italic;
+  font-weight: 400;
+}
+
+h4 .header-section-number,
+h5 .header-section-number {
+  display: none;
+}
