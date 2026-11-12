@@ -81,6 +81,9 @@ body {
   font-optical-sizing: auto;
   background: var(--wfmr-bg);
   color: var(--wfmr-text);
+  // Slightly tighter than Bootstrap's 1.5: the serif body face sets
+  // with a large x-height, so it holds together on less leading.
+  line-height: 1.45;
 }
 
 body a {
@@ -247,6 +250,11 @@ body.quarto-dark .label-lime {
   color: inherit;
 }
 
+.quarto-float-caption.quarto-float-fig {
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
 .quarto-float-caption .chart-subtitle {
   display: inline-block;
   margin-top: 0.15rem;
@@ -258,6 +266,24 @@ body.quarto-dark .label-lime {
 .table.table-striped {
   --bs-table-striped-bg: var(--wfmr-table-stripe);
   --bs-table-striped-color: var(--wfmr-text);
+}
+
+// Tables set a step smaller than body text: a table is scanned
+// rather than read line by line, so it takes tighter setting than
+// prose, and the smaller size keeps wide tables inside the column.
+// Covers plain markdown tables, knitr::kable and gt output; the
+// paged tables Quarto uses for df-print: paged carry their own
+// class and are matched too.
+.table,
+table.dataframe,
+.cell-output-display > table,
+.gt_table {
+  font-size: 0.875rem;
+}
+
+.table caption,
+caption {
+  font-size: 0.875rem;
 }
 
 .wfmr-svg-chart {

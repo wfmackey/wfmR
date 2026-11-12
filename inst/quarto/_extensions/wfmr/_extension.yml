@@ -50,7 +50,7 @@ contributes:
         - bottom=1.2in
         - footskip=0.7in
       fontsize: 11pt
-      linestretch: 1.2
+      linestretch: 1.1
       toc: false
       colorlinks: true
       linkcolor: black

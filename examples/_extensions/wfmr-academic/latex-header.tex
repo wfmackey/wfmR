@@ -23,6 +23,13 @@
 \usepackage{float}
 \usepackage{fancyhdr}
 \usepackage{etoolbox}
+% Keep wrapped footnote text aligned, with a gap after each hanging marker.
+\makeatletter
+\patchcmd{\@makefntext}
+  {\llap{\@makefnmark}}
+  {\llap{\@makefnmark\hspace{0.5em}}}
+  {}{\PackageError{wfmR}{Unable to set footnote marker spacing}{}}
+\makeatother
 \usepackage{flafter}
 \IfFileExists{placeins.sty}{\usepackage{placeins}}{\newcommand{\FloatBarrier}{}}
 \newcommand{\wfmAcademicAuthor}[3]{%
@@ -37,7 +44,7 @@
   justification=centering,
   singlelinecheck=false
 }
-\captionsetup[figure]{name={\textsc{chart}}, position=bottom}
+\captionsetup[figure]{font=footnotesize, name={\textsc{chart}}, position=bottom}
 \captionsetup[table]{name={\textsc{table}}, position=top}
 \renewcommand{\figurename}{\textsc{chart}}
 \renewcommand{\tablename}{\textsc{table}}

@@ -31,10 +31,17 @@
 \usepackage{float}
 \usepackage{fancyhdr}
 \usepackage{etoolbox}
+% Keep wrapped footnote text aligned, with a gap after each hanging marker.
+\makeatletter
+\patchcmd{\@makefntext}
+  {\llap{\@makefnmark}}
+  {\llap{\@makefnmark\hspace{0.5em}}}
+  {}{\PackageError{wfmR}{Unable to set footnote marker spacing}{}}
+\makeatother
 \usepackage{flafter}
 \IfFileExists{placeins.sty}{\usepackage{placeins}}{\newcommand{\FloatBarrier}{}}
 \usepackage{caption}
-\captionsetup[figure]{labelfont=bf}
+\captionsetup[figure]{font=footnotesize, labelfont=bf}
 \renewcommand{\figurename}{Chart}
 \makeatletter
 \def\fps@figure{tb}
@@ -60,3 +67,12 @@
   \renewcommand{\footrulewidth}{0pt}%
 }
 \AtBeginEnvironment{CSLReferences}{\small}
+% Tables set a step smaller than body text: a table is scanned, not
+% read line by line, so it takes tighter setting than prose, and the
+% smaller size lets wide tables fit the measure without scaling.
+% longtable covers Quarto's default kable output; tabular and
+% tabularx cover the rest.
+\AtBeginEnvironment{longtable}{\footnotesize}
+\AtBeginEnvironment{tabular}{\footnotesize}
+\AtBeginEnvironment{tabularx}{\footnotesize}
+\captionsetup[table]{font=small}
