@@ -1,6 +1,6 @@
 Package: wfmR
 Title: Will Mackey's R Graphics and Quarto Defaults
-Version: 0.0.0.9001
+Version: 0.0.1
 Authors@R: 
     person("Will", "Mackey", email = "will.mackey@anu.edu.au",
            role = c("aut", "cre"))
